@@ -27,8 +27,8 @@ and updating documents through manipulation of the
 underlying data, and a deep API for drawing and
 animating SVG.
 
-Learn more: http://d3js.org/
-GitHub: https://github.com/mbostock/d3
-Documentation: https://github.com/mbostock/d3/wiki
-Tutorials: https://github.com/mbostock/d3/wiki/Tutorials
+* Learn more: http://d3js.org/
+* GitHub: https://github.com/mbostock/d3
+* Documentation: https://github.com/mbostock/d3/wiki
+* Tutorials: https://github.com/mbostock/d3/wiki/Tutorials
 
