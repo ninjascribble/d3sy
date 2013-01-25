@@ -1,4 +1,10 @@
-var _stage = d3.select('body').append('svg').attr('height', 200)
+;(function() {
+
+// Title
+d3.select('body').append('h2').text('Dancing Bar Graph');
+d3.select('body').append('svg').attr('id', 'main').attr('height', 200);
+
+var _stage = d3.select('#main')
   , _duration = 800;
 
 update();
@@ -15,6 +21,7 @@ function update() {
       , sw = parseInt(_stage.style('width'))
       , sh = parseInt(_stage.style('height'))
       , rw = Math.ceil( (sw - margin * 2) / data.length - 1)
+
       , x = function(d, i) { return i * rw + i }
       , y = function(d, i) { return sh - d }
       , h = function(d, i) { return d; };
@@ -71,3 +78,4 @@ function createLogarithmicData(amount, seed) {
 
     return result;
 }
+}());
