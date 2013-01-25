@@ -44,3 +44,7 @@ svg {
    fill: steelblue;
  stroke: white;
 }
+#main path {
+  fill: none;
+  stroke: steelblue;
+}
