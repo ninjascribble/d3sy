@@ -17,6 +17,10 @@ svg {
     background-color: lightgray;
 }
 
+text {
+  text-anchor: middle;
+}
+
 .day {
   fill: #fff;
   stroke: #ccc;
