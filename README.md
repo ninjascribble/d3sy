@@ -9,12 +9,14 @@ want some code to jump off with.
 Quickstart
 ----------
 
+```bash
 $ git clone git@github.com:ninjascribble/d3sy.git
 $ cd d3sy
 $ nmp install
 $ node app
+```
 
-Browse to: http://localhost:3000
+then browse to: [http://localhost:3000](http://localhost:3000)
 
 What is d3?
 -----------
