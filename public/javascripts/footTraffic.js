@@ -63,11 +63,9 @@
       }
       , calcLine = d3.svg.line()
                .x(function (d) {
-                  console.log(x(d))
                   return x(d);
                })
                .y(function (d) {
-                  console.log(h(d, 0))
                   return h(d, 0);
                });
 
