@@ -1,39 +1,71 @@
-var _stage = d3.select('body').append('svg');
+var _stage = d3.select('body').append('svg').attr('height', 200)
+  , _duration = 800;
 
-setInterval(function() {
+update();
+setInterval(update, _duration);
 
-    var circles = _stage.selectAll('circle').data(createLogarithmicData(Math.ceil( Math.random() * 12 ), Math.random() * 42));
+/*
+ * SVG Shapes: https://github.com/mbostock/d3/wiki/SVG-Shapes
+ */
+function update() {
 
-    circles.enter().insert('circle')
-        .attr('cy', 200)
-        .attr('cx', function(d, i) { return i * 60 })
+    var data = createRandomData(12, 80, 140)
+      , rects = _stage.selectAll('rect').data(data)
+      , margin = 0
+      , sw = parseInt(_stage.style('width'))
+      , sh = parseInt(_stage.style('height'))
+      , rw = Math.ceil( (sw - margin * 2) / data.length - 1)
+      , x = function(d, i) { return i * rw + i }
+      , y = function(d, i) { return sh - d }
+      , h = function(d, i) { return d; };
+
+    rects.enter().insert('rect')
+        .attr('y', sh)
+        .attr('x', x)
+        .attr('width', rw)
         .transition()
-        .attr('r', function(d, i) { return d; });
+            .duration(_duration)
+            .attr('y', y)
+            .attr('height', h);
 
-    circles.transition()
-        .duration(600)
-        .attr('cy', 200)
-        .attr('cx', function(d, i) { return i * 60 })
-        .attr('r', function(d, i) { return d; });
+    rects.transition()
+        .duration(_duration)
+        .attr('y', y)
+        .attr('x', x)
+        .attr('width', rw)
+        .attr('height', h);
 
-    circles.exit().transition()
-        .duration(600)
-        .attr('r', 0)
+    rects.exit().transition()
+        .duration(_duration)
+        .attr('height', 0)
         .remove();
-
-}, 800);
+}
 
 /*
  * Utilities
  * ========= */
+function createRandomData(amount, min, max) {
+
+    var result = []
+      , seed = seed || 42
+      , i = 0
+      , len = amount || 12;
+
+    for (i; i < len; i++) {
+        result.push(Math.random() * (max - min) + min);
+    }
+
+    return result;
+}
+
 function createLogarithmicData(amount, seed) {
 
     var result = []
       , seed = seed || 42
-      , i = 1
+      , i = 2
       , len = amount++ || 12++;
 
-    for (i; i < len; i++) {
+    for (i; i <= len; i++) {
         result.push(seed * Math.log(i));
     }
 
