@@ -24,7 +24,7 @@ text {
 path {
   fill: none;
   stroke: steelblue;
-  stroke-width: 3;
+  stroke-width: 3px;
   stroke-linecap: round;
   stroke-linejoin: round;
 }

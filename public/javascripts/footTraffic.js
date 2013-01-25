@@ -16,7 +16,7 @@
     }
   };
 
-  var _duration = 800;
+  var _duration = 400;
 
   // Title
   var body = d3.select('body');
@@ -31,9 +31,12 @@
 
 
   // set the stage
-  body.append('svg').attr('id', 'foot-traffic').attr('height', 500);
+  body.append('svg').attr('id', 'foot-traffic').attr('height', 500);  
 
   var _stage = d3.select('#foot-traffic');
+  var path = _stage.append('path');
+
+  var current;
 
   update();
 
@@ -42,7 +45,7 @@
     var height = parseInt(_stage.style('height')), width = parseInt(_stage.style('width'));
 
     var data = filterData(dropdown.property('value'))
-      , line = _stage.selectAll('path').data(data)
+      , line = path.data(data)
       , margin = 0
       , scaleX = d3.time.scale().domain(d3.extent(data, function (d) {
                return d.date;
@@ -61,34 +64,59 @@
       , h = function(d, i) { 
         return scaleY(d.value); 
       }
+      , flattenLine = d3.svg.line()
+          .x(function (d) {
+            console.log('flatten');
+              return current.scaleX(d.date);
+          })
+          .y(function (d) {
+            return height / 2;
+          })
+      , scaleXLine = d3.svg.line()
+          .x(function (d) {
+            console.log('scale')
+              return x(d);
+          })
+          .y(function (d) {
+            return height / 2;
+          })
       , calcLine = d3.svg.line()
-               .x(function (d) {
-                  return x(d);
-               })
-               .y(function (d) {
-                  return h(d, 0);
-               });
+           .x(function (d) {
+            console.log('calc')
+              return x(d);
+           })
+           .y(function (d) {
+              return h(d, 0);
+           });
 
-    line.enter().insert('path')
-        .attr('d', calcLine(data))
-        // .attr('y', sh)
-        // .attr('x', x)
-        // .attr('width', rw)
-        .transition()
-            .duration(_duration);
+    // line.enter().insert('path')
+    //     .attr('d', calcLine(data))
+    //     // .attr('y', sh)
+    //     // .attr('x', x)
+    //     // .attr('width', rw)
+    //     .transition()
+    //         .duration(_duration);
+    if (current) {
+      line.transition()
+          .duration(_duration)
+          .delay(000)
+          .attr('d', flattenLine(current.data));
 
-    line.transition()
-        .duration(_duration)
-        .attr('d', calcLine(data));
+      line.transition()
+          .duration(0)
+          .delay(_duration)
+          .attr('d', scaleXLine(data));
+    }
         // .attr('y', y)
         // .attr('x', x)
         // .attr('width', rw)
         // .attr('height', h);
+    line.transition()
+      .duration(_duration)
+      .delay(_duration*2)
+      .attr('d', calcLine(data));
 
-    line.exit().transition()
-        .duration(_duration)
-        .attr('d', calcLine(data))
-        .remove();
+      current = { data: data, scaleX: scaleX, scaleY: scaleY};
   };
 
   function filterData(filter) {
