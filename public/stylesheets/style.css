@@ -21,6 +21,11 @@ text {
   text-anchor: middle;
 }
 
+path {
+  fill: none;
+  stroke: steelblue;
+}
+
 .day {
   fill: #fff;
   stroke: #ccc;
@@ -47,8 +52,4 @@ text {
 .chart rect {
    fill: steelblue;
  stroke: white;
-}
-#main path {
-  fill: none;
-  stroke: steelblue;
 }

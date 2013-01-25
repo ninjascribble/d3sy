@@ -1,4 +1,4 @@
-//;(function() {
+;(function() {
   var rawData = {
     "chart": {
       //"hourly": [435, 400, 372, 343, 310, 274, 203, 150, 175, 216, 218, 294, 315, 349, 385, 423, 489, 512, 523, 534, 560, 502, 478],
@@ -31,9 +31,9 @@
 
 
   // set the stage
-  body.append('svg').attr('id', 'main').attr('height', 500);
+  body.append('svg').attr('id', 'foot-traffic').attr('height', 500);
 
-  var _stage = d3.select('#main');
+  var _stage = d3.select('#foot-traffic');
 
   update();
 
@@ -137,5 +137,4 @@
     return filteredData;
   }
 
-
-//}());
+}());
