@@ -4,11 +4,13 @@ var MONTHS = [ 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'O
 
 // Title
 d3.select('body').append('h2').text('Revenue vs. Projected Revenue');
+d3.select('body').append('select').attr('id', 'revenue-selector');
 d3.select('body').append('svg').attr('id', 'revenue').attr('height', 200);
 d3.select('#revenue').append('g');
 d3.select('#revenue').append('path');
 
 var _stage = d3.select('#revenue')
+  , _selector = d3.select('#revenue-selector')
   , _line = d3.select('#revenue > path')
   , _graph = d3.select('#revenue > g')
   , _duration = 800
@@ -27,26 +29,35 @@ var _stage = d3.select('#revenue')
   		{ time: new Date('10/1/2012'), actual:  719000, projected: 675000 },
   		{ time: new Date('11/1/2012'), actual:  979000, projected: 812000 },
   		{ time: new Date('12/1/2012'), actual: 1300000, projected: 980000 }
+  	],
+
+  	daily: [
+  		{ time: new Date('1/1/2012'), actual: 35483, projected: 34232 },
+  		{ time: new Date('1/2/2012'), actual: 32433, projected: 31252 },
+  		{ time: new Date('1/3/2012'), actual: 33421, projected: 32552 },
+  		{ time: new Date('1/4/2012'), actual: 33823, projected: 30124 },
+  		{ time: new Date('1/5/2012'), actual: 31234, projected: 30021 },
+  		{ time: new Date('1/6/2012'), actual: 30234, projected: 28412 },
+  		{ time: new Date('1/7/2012'), actual: 34214, projected: 32413 }
   	]
   };
 
-update();
-// setTimeout(update, _duration);
+update('monthly');
 
-function update() {
+function update(str) {
 
-	var data = _data.monthly;
+	var data = _data[str];
 
 	var sets = _graph.selectAll('g').data(data)
 	  , margin = 0
-	  , max = 1500000
+	  , max = d3.max(data.map(function(o,i) { return o.actual; }))
 	  , sw = parseInt(_stage.style('width'))
 	  , sh = parseInt(_stage.style('height'))
 	  , rw = Math.ceil( (sw - margin) / (data.length * 2) )
 
 	  , x = function(d, i) { return i * rw * 2 + rw / 4 }
 	  , textx = function(d, i) { return x(d, i) + rw / 2 }
-	  , h = function(d, i) { return sh * d.actual / max - 20 }
+	  , h = function(d, i) { return sh * d.actual / max - 30 }
 	  , y = function(d, i) { return sh - h(d, i) - 20 };
 
 	var enteringGroup = sets.enter().insert('g');
@@ -68,7 +79,7 @@ function update() {
 
 	var line = d3.svg.line()
 	  	.x(textx)
-	  	.y( function(d, i) { return sh - (sh * d.projected / max) } );
+	  	.y( function(d, i) { return sh - (sh * d.projected / max - 20) } );
 
 	_line.attr('d', line(data))
 }
