@@ -1,6 +1,7 @@
 ;(function() {
 
-var MONTHS = [ 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC' ];
+var MONTHS = [ 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC' ]
+  , DAYS = [ 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT' ];
 
 // Title
 d3.select('body').append('h2').text('Revenue vs. Projected Revenue');
@@ -42,6 +43,14 @@ var _stage = d3.select('#revenue')
   	]
   };
 
+for (var key in _data) {
+	_selector.append('option').attr('value', key).text(key);
+}
+
+_selector.on('change', function() {
+	update(this.value)
+});
+
 update('monthly');
 
 function update(str) {
@@ -60,7 +69,8 @@ function update(str) {
 	  , h = function(d, i) { return sh * d.actual / max - 30 }
 	  , y = function(d, i) { return sh - h(d, i) - 20 };
 
-	var enteringGroup = sets.enter().insert('g');
+	var enteringGroup = sets.enter().insert('g')
+	  , leavingGroup = sets.exit();
 
 	enteringGroup.insert('rect')
 		.attr('y', sh - 20)
@@ -76,6 +86,13 @@ function update(str) {
 		.attr('x', textx)
 		.attr('width', rw)
 		.text(function(d, i) { return MONTHS[d.time.getMonth()] });
+
+	leavingGroup.selectAll('rect')
+		.transition()
+			.duration(_duration)
+			.attr('y', sh - 20)
+			.attr('height', 0)
+			.remove();
 
 	var line = d3.svg.line()
 	  	.x(textx)
