@@ -76,13 +76,20 @@
       },
       flattenLine = d3.svg.line().x(function(d) { return current.scaleX(d.date); }).y(function(d) { return height / 2; }),
       scaleXLine = d3.svg.line().x(function(d) { return x(d); }).y(function(d) { return height / 2; }),
-      calcLine = d3.svg.line().x(function(d) { return x(d); }).y(function(d) { return h(d, 0); });
+      calcLine = d3.svg.line().x(function(d) { return x(d); }).y(function(d) { return h(d, 0); }),
+      point = meta.enter().insert('g');
 
     meta.exit().remove();
-    meta.enter().insert('g').insert('text');
+      point.insert('text').attr('class', 'xAxis');
+      point.insert('circle');
+      point.insert('text').attr('class', 'label');
 
-    meta.selectAll('text').attr('y', sh - 5).attr('x', x).text(function(d, i) {
+    meta.selectAll('.xAxis').attr('y', sh - 5).attr('x', x).text(function(d, i) {
       return d.date.toDateString();
+    });
+    meta.selectAll('circle').attr('cy', h).attr('cx', x).attr('r', 5)
+    meta.selectAll('.label').attr('y', function (d) { return h(d)-10 }).attr('x', x).text(function(d, i) {
+      return d.value;
     });
 
     if(current) {
