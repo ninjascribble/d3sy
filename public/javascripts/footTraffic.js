@@ -80,9 +80,9 @@
       point = meta.enter().insert('g');
 
     meta.exit().remove();
-      point.insert('text').attr('class', 'xAxis');
-      point.insert('circle');
-      point.insert('text').attr('class', 'label');
+      point.insert('text').attr('class', 'xAxis').attr('opacity',0).transition().delay(_duration).duration(_duration).attr('opacity',1);
+      point.insert('circle').attr('opacity',0).transition().delay(_duration).duration(_duration).attr('opacity',1);
+      point.insert('text').attr('class', 'label').attr('opacity',0).transition().delay(_duration).duration(_duration).attr('opacity',1);
 
     meta.selectAll('.xAxis').attr('y', sh - 5).attr('x', x).text(function(d, i) {
       return d.date.toDateString();
