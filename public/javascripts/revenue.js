@@ -47,9 +47,7 @@ _selector.on('change', function() {
 
 // Stash the moving parts of the chart
 var margin = 20
-  , duration = 300
-  , total = _stage.selectAll('text.total')
-  , label = _stage.selectAll('text.label');
+  , duration = 300;
 
 update('monthly');
 
@@ -60,7 +58,8 @@ function update(type) {
 
   renderNet(data, range);
   renderGross(data, range);
-  renderLabel(data);
+  renderLabel(data, range);
+  renderTotal(data, range);
 }
 
 function getRange(data) {
@@ -149,19 +148,48 @@ function renderGross(data, range) {
     .remove();
 }
 
-function renderLabel(data) {
+function renderLabel(data, range) {
 
   var selected = _stage.selectAll('text.label').data(data, function(d) { return d.time.toUTCString(); })
     , floor = parseInt(_stage.style('height')) - margin
     , barWidth = Math.ceil( (parseInt(_stage.style('width'))) / (data.length * 2) )
     , fn = {
-      x: function(d, i) { return i * barWidth * 2 + barWidth * .75 },
-      y: function(d, i) { return floor + parseInt(this.clientHeight) },
+      x: function(d, i) { return i * barWidth * 2 + barWidth * .75; },
+      y: function(d, i) { return floor + parseInt(this.clientHeight); },
       text: function(d, i) { return MONTHS[d.time.getMonth()]; }
     };
 
   selected.enter().insert('text')
     .attr('class', 'label')
+    .text(fn.text)
+    .attr('x', fn.x)
+    .attr('y', fn.y)
+    .attr('fill-opacity', 0);
+
+  selected.transition()
+    .delay(duration)
+    .duration(duration)
+    .attr('fill-opacity', 1);
+
+  selected.exit().transition()
+    .duration(duration)
+    .attr('fill-opacity', 0)
+    .remove();
+}
+
+function renderTotal(data, range) {
+
+  var selected = _stage.selectAll('text.total').data(data, function(d) { return d.time.toUTCString(); })
+    , floor = parseInt(_stage.style('height')) - margin
+    , barWidth = Math.ceil( (parseInt(_stage.style('width'))) / (data.length * 2) )
+    , fn = {
+      x: function(d, i) { return i * barWidth * 2 + barWidth * .75; },
+      y: function(d, i) { return floor - range(d.net) - range(d.gross - d.net) - parseInt(this.clientHeight) / 2; },
+      text: function(d, i) { return '$' + d.gross; }
+    };
+
+  selected.enter().insert('text')
+    .attr('class', 'total')
     .text(fn.text)
     .attr('x', fn.x)
     .attr('y', fn.y)
