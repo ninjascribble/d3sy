@@ -6,8 +6,8 @@ var MONTHS = [ 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'O
 // Build the DOM
 d3.select('body').append('h2').text('Revenue vs. Projected Revenue');
 
-var _stage = d3.select('body').append('svg').attr('id', 'revenue').attr('height', 200)
-  , _selector = d3.select('body').append('select').attr('id', 'revenue-selector')
+var _selector = d3.select('body').append('select').attr('id', 'revenue-selector')
+  , _stage = d3.select('body').append('svg').attr('id', 'revenue').attr('height', 200)
   , _data = {
 
   	monthly: [
