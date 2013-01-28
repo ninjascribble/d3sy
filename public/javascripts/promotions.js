@@ -32,10 +32,12 @@
   body.append('svg').attr('id', 'promotions').attr('height', 500);
 
   var _stage = d3.select('#promotions');
-  var path = _stage.append('path');
+  // var promotionPath = _stage.append('path');
+  // var salesPath = _stage.append('path');
   var group = _stage.append('g');
   var margin = 50;
-  path.attr("transform", "translate(" + margin + "," + margin + ")");
+  // promotionPath.attr("transform", "translate(" + margin + "," + margin + ")");
+  // salesPath.attr("transform", "translate(" + margin + "," + margin + ")");
   group.attr("transform", "translate(" + margin + "," + margin + ")");
 
   var current;
@@ -48,35 +50,51 @@
       width = parseInt(_stage.style('width'));
 
     var filter = dropdown.property('value'),
-      data = filterData(filter)
-      line = path.data(data),
+      data = filterData(filter);
+
+
+
       meta = group.selectAll('g').data(data, function (d) { 
           return d.date;
       }),
       sw = width - (margin * 2),
       sh = height - (margin * 2),
-      scaleX = d3.time.scale().domain(d3.extent(data, function(d) {
-        return d.date;
-      })).range([0, sw]),
-      scaleY = d3.scale.linear().domain(d3.extent(data, function(d) {
-        return d.promotionAmt;
-      })).range([sh, 0]),
+      scaleX = d3.time.scale().range([0, sw])
+        .domain([
+          d3.min(data, function (d) { return d3.min(d.values, function (e) { return e.date }); }),
+          d3.max(data, function (d) { return d3.max(d.values, function (e) { return e.date }); })
+        ]),
+      scaleY = d3.scale.linear().range([sh, 0])
+        .domain([
+          d3.min(data, function (d) { return d3.min(d.values, function (e) { return e.value }); }),
+          d3.max(data, function (d) { return d3.max(d.values, function (e) { return e.value }); })
+        ]),
       rw = Math.ceil((sw - margin * 2) / data.length - 1),
       x = function(d, i) {
-        return scaleX(d.date)
+        return scaleX(d)
       },
       y = function(d, i) {
-        return sh - scaleY(d.promotionAmt)
-      },
-      h = function(d, i) {
-        return scaleY(d.promotionAmt);
+        return scaleY(d);
       },
       flattenLine = d3.svg.line().x(function(d) { return current.scaleX(d.date); }).y(function(d) { return height / 2; }),
       scaleXLine = d3.svg.line().x(function(d) { return x(d); }).y(function(d) { return height / 2; }),
-      calcArea = d3.svg.area().interpolate("cardinal").x(function(d) { return x(d); }).y0(height).y1(function(d) { return h(d, 0); });
+      calcArea = d3.svg.area().interpolate("cardinal").x(function(d) { 
+        return x(d.date); 
+      }).y0(height).y1(function(d) { 
+        return y(d.value); 
+      });
+
+      var pathGroup = _stage.selectAll('.pathGroup')
+        .data(data)
+        .enter().append('g').attr('class','.pathGroup');
+
+      pathGroup.append('path')
+        .attr('class', 'area')
+        .attr('id', function (d) { return d.name })
+        .attr('d', function (d) { return calcArea(d.values) } )
 
 
-    line.transition().duration(_duration).delay(_duration * 1).attr('d', calcArea(data));
+      //promotionLine.transition().duration(_duration).delay(_duration).attr('d', calcArea(data));
 
     current = {
       data: data,
@@ -89,28 +107,37 @@
     filteredData = [];
 
     var data = rawData.chart[filter];
-    var dates = Array(data.length);
     var i = 0;
 
     switch(filter) {
     case "daily":
       var date;
-      var obj;
-      for(var i = 6; i > -1; i--) {
-        obj = {};
-        date = new Date();
-        date.setDate(date.getDate() - [i]);
-        date.setHours(0);
-        date.setMinutes(0);
-        date.setSeconds(0);
-        dates.push(date);
+      var keyObj;
+      var pathObj;
 
-        for (var key in data) {
-          obj[key] = data[key][i];          
+      for (var key in data) {
+        keyObj = {}
+        keyObj.name = key;
+        keyObj.values = [];
+
+        for(var i = 6; i > -1; i--) {
+          pathObj = {};
+          date = new Date();
+          date.setDate(date.getDate() - [i]);
+          date.setHours(0);
+          date.setMinutes(0);
+          date.setSeconds(0);
+          pathObj.date = date;
+          pathObj.value = data[key][i]
+
+          keyObj.values.push(pathObj);
         }
-        obj.date = date;
-        filteredData.push(obj);
+
+        filteredData.push(keyObj);
       }
+      
+
+      
       break;
     case 'monthly':
     default:

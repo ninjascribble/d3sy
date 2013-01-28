@@ -29,12 +29,18 @@ path {
   stroke-linejoin: round;
 }
 
-#promotions path {
+path.area {
   fill: steelblue;
   stroke: none;
   stroke-width: 0;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+#promotionAmt {
+  opacity: 0.5;
+}
+#salesAmt {
+  opacity: 0.7;
 }
 
 .day {
