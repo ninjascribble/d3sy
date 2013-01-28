@@ -11,18 +11,18 @@ var _stage = d3.select('body').append('svg').attr('id', 'revenue').attr('height'
   , _data = {
 
   	monthly: [
-  		{ time: new Date('1/1/2012'),  gross: 1100000, net: 980000 },
-  		{ time: new Date('2/1/2012'),  gross:  772000, net: 680000 },
-  		{ time: new Date('3/1/2012'),  gross:  805000, net: 710000 },
-  		{ time: new Date('4/1/2012'),  gross:  727000, net: 670000 },
-  		{ time: new Date('5/1/2012'),  gross:  731000, net: 641000 },
-  		{ time: new Date('6/1/2012'),  gross:  728000, net: 680000 },
-  		{ time: new Date('7/1/2012'),  gross:  858000, net: 790000 },
-  		{ time: new Date('8/1/2012'),  gross:  864000, net: 740000 },
-  		{ time: new Date('9/1/2012'),  gross:  716000, net: 670000 },
-  		{ time: new Date('10/1/2012'), gross:  719000, net: 675000 },
-  		{ time: new Date('11/1/2012'), gross:  979000, net: 812000 },
-  		{ time: new Date('12/1/2012'), gross: 1300000, net: 980000 }
+  		{ time: new Date('1/31/2012'),  gross: 1100000, net: 980000 },
+  		{ time: new Date('2/28/2012'),  gross:  772000, net: 680000 },
+  		{ time: new Date('3/31/2012'),  gross:  805000, net: 710000 },
+  		{ time: new Date('4/30/2012'),  gross:  727000, net: 670000 },
+  		{ time: new Date('5/31/2012'),  gross:  731000, net: 641000 },
+  		{ time: new Date('6/30/2012'),  gross:  728000, net: 680000 },
+  		{ time: new Date('7/31/2012'),  gross:  858000, net: 790000 },
+  		{ time: new Date('8/31/2012'),  gross:  864000, net: 740000 },
+  		{ time: new Date('9/30/2012'),  gross:  716000, net: 670000 },
+  		{ time: new Date('10/31/2012'), gross:  719000, net: 675000 },
+  		{ time: new Date('11/30/2012'), gross:  979000, net: 812000 },
+  		{ time: new Date('12/31/2012'), gross: 1300000, net: 980000 }
   	],
 
   	daily: [
@@ -47,7 +47,7 @@ _selector.on('change', function() {
 
 // Stash the moving parts of the chart
 var margin = 20
-  , duration = 400
+  , duration = 600
   , total = _stage.selectAll('text.total')
   , label = _stage.selectAll('text.label');
 
@@ -82,7 +82,7 @@ function getRange(data) {
 
 function renderNet(data, range) {
 
-  var selected = _stage.selectAll('rect.net').data(data)
+  var selected = _stage.selectAll('rect.net').data(data, function(d) { return d.time.toUTCString(); })
     , floor = parseInt(_stage.style('height')) - margin
     , barWidth = Math.ceil( (parseInt(_stage.style('width'))) / (data.length * 2) )
     , fn = {
@@ -95,23 +95,26 @@ function renderNet(data, range) {
   selected.enter().insert('rect')
     .attr('class', 'net q0-11')
     .attr('x', fn.x)
-    .attr('y', fn.y)
-    .attr('height', fn.h)
+    .attr('y', floor)
+    .attr('height', 0)
     .attr('width', fn.w);
 
   selected.transition()
-    .attr('x', fn.x)
-    .attr('y', fn.y)
-    .attr('height', fn.h)
-    .attr('width', fn.w);
+    .duration(duration)
+      .attr('x', fn.x)
+      .attr('y', fn.y)
+      .attr('height', fn.h)
+      .attr('width', fn.w);
 
-  selected.exit()
+  selected.exit().transition()
+    .attr('y', floor)
+    .attr('height', 0)
     .remove();
 }
 
 function renderGross(data, range) {
 
-  var selected = _stage.selectAll('rect.gross').data(data)
+  var selected = _stage.selectAll('rect.gross').data(data, function(d) { return d.time.toUTCString(); })
     , floor = parseInt(_stage.style('height')) - margin
     , barWidth = Math.ceil( (parseInt(_stage.style('width'))) / (data.length * 2) )
     , fn = {
@@ -124,91 +127,21 @@ function renderGross(data, range) {
   selected.enter().insert('rect')
     .attr('class', 'gross q2-11')
     .attr('x', fn.x)
-    .attr('y', fn.y)
-    .attr('height', fn.h)
-    .attr('width', fn.w);
+    .attr('y', floor)
+    .attr('height', 0)
+    .attr('width', fn.w)
 
   selected.transition()
-    .attr('x', fn.x)
-    .attr('y', fn.y)
-    .attr('height', fn.h)
-    .attr('width', fn.w);
+    .duration(duration)
+      .attr('x', fn.x)
+      .attr('y', fn.y)
+      .attr('height', fn.h)
+      .attr('width', fn.w);
 
-  selected.exit()
+  selected.exit().transition()
+    .attr('y', floor)
+    .attr('height', 0)
     .remove();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// function update(str) {
-
-// 	var data = _data[str];
-
-// 	var sets = _graph.selectAll('g').data(data)
-// 	  , margin = 0
-// 	  , max = d3.max(data.map(function(o,i) { return o.actual; }))
-// 	  , sw = parseInt(_stage.style('width'))
-// 	  , sh = parseInt(_stage.style('height'))
-// 	  , rw = Math.ceil( (sw - margin) / (data.length * 2) )
-
-// 	  , x = function(d, i) { return i * rw * 2 + rw / 4 }
-// 	  , textx = function(d, i) { return x(d, i) + rw / 2 }
-// 	  , h = function(d, i) { return sh * d.actual / max - 30 }
-// 	  , y = function(d, i) { return sh - h(d, i) - 20 };
-
-// 	var enteringGroup = sets.enter().insert('g')
-// 	  , leavingGroup = sets.exit();
-
-// 	enteringGroup.insert('rect')
-// 		.attr('y', sh - 20)
-// 		.attr('x', x)
-// 		.attr('width', rw)
-// 		.transition()
-// 			.duration(_duration)
-// 			.attr('y', y)
-// 			.attr('height', h);
-
-// 	enteringGroup.insert('text')
-// 		.attr('y', sh - 5)
-// 		.attr('x', textx)
-// 		.attr('width', rw)
-// 		.text(function(d, i) { return MONTHS[d.time.getMonth()] });
-
-// 	leavingGroup.selectAll('rect')
-// 		.transition()
-// 			.duration(_duration)
-// 			.attr('y', sh - 20)
-// 			.attr('height', 0)
-// 			.remove();
-
-// 	var line = d3.svg.line()
-// 	  	.x(textx)
-// 	  	.y( function(d, i) { return sh - (sh * d.projected / max - 20) } );
-
-// 	_line.attr('d', line(data))
-// }
 
 }());
