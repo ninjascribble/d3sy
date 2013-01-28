@@ -47,7 +47,7 @@ _selector.on('change', function() {
 
 // Stash the moving parts of the chart
 var margin = 20
-  , duration = 600
+  , duration = 300
   , total = _stage.selectAll('text.total')
   , label = _stage.selectAll('text.label');
 
@@ -60,6 +60,7 @@ function update(type) {
 
   renderNet(data, range);
   renderGross(data, range);
+  renderLabel(data);
 }
 
 function getRange(data) {
@@ -100,6 +101,7 @@ function renderNet(data, range) {
     .attr('width', fn.w);
 
   selected.transition()
+    .delay(duration)
     .duration(duration)
       .attr('x', fn.x)
       .attr('y', fn.y)
@@ -107,6 +109,7 @@ function renderNet(data, range) {
       .attr('width', fn.w);
 
   selected.exit().transition()
+    .duration(duration)
     .attr('y', floor)
     .attr('height', 0)
     .remove();
@@ -132,6 +135,7 @@ function renderGross(data, range) {
     .attr('width', fn.w)
 
   selected.transition()
+    .delay(duration)
     .duration(duration)
       .attr('x', fn.x)
       .attr('y', fn.y)
@@ -139,8 +143,38 @@ function renderGross(data, range) {
       .attr('width', fn.w);
 
   selected.exit().transition()
+    .duration(duration)
     .attr('y', floor)
     .attr('height', 0)
+    .remove();
+}
+
+function renderLabel(data) {
+
+  var selected = _stage.selectAll('text.label').data(data, function(d) { return d.time.toUTCString(); })
+    , floor = parseInt(_stage.style('height')) - margin
+    , barWidth = Math.ceil( (parseInt(_stage.style('width'))) / (data.length * 2) )
+    , fn = {
+      x: function(d, i) { return i * barWidth * 2 + barWidth * .75 },
+      y: function(d, i) { return floor + parseInt(this.clientHeight) },
+      text: function(d, i) { return MONTHS[d.time.getMonth()]; }
+    };
+
+  selected.enter().insert('text')
+    .attr('class', 'label')
+    .text(fn.text)
+    .attr('x', fn.x)
+    .attr('y', fn.y)
+    .attr('fill-opacity', 0);
+
+  selected.transition()
+    .delay(duration)
+    .duration(duration)
+    .attr('fill-opacity', 1);
+
+  selected.exit().transition()
+    .duration(duration)
+    .attr('fill-opacity', 0)
     .remove();
 }
 
