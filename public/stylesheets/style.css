@@ -29,6 +29,14 @@ path {
   stroke-linejoin: round;
 }
 
+#promotions path {
+  fill: steelblue;
+  stroke: none;
+  stroke-width: 0;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .day {
   fill: #fff;
   stroke: #ccc;
