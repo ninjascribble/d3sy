@@ -47,7 +47,12 @@ _selector.on('change', function() {
 
 // Stash the moving parts of the chart
 var margin = 20
-  , duration = 300;
+  , duration = 300
+  , formatters = {
+    monthly: d3.time.format('%b'),
+    daily: d3.time.format('%a'),
+    currency: d3.format('s')
+  };
 
 update('monthly');
 
@@ -55,6 +60,16 @@ function update(type) {
 
 	var data = _data[type]
     , range = getRange(data);
+
+  switch(type) {
+    case 'daily':
+      formatters.date = formatters.daily;
+      break;
+    case 'monthly':
+    default:
+      formatters.date = formatters.monthly;
+      break;
+  }
 
   renderNet(data, range);
   renderGross(data, range);
@@ -156,7 +171,7 @@ function renderLabel(data, range) {
     , fn = {
       x: function(d, i) { return i * barWidth * 2 + barWidth * .75; },
       y: function(d, i) { return floor + parseInt(this.clientHeight); },
-      text: function(d, i) { return MONTHS[d.time.getMonth()]; }
+      text: function(d, i) { return formatters.date(d.time).toUpperCase(); }
     };
 
   selected.enter().insert('text')
@@ -185,7 +200,7 @@ function renderTotal(data, range) {
     , fn = {
       x: function(d, i) { return i * barWidth * 2 + barWidth * .75; },
       y: function(d, i) { return floor - range(d.net) - range(d.gross - d.net) - parseInt(this.clientHeight) / 2; },
-      text: function(d, i) { return '$' + d.gross; }
+      text: function(d, i) { return '$' + formatters.currency(d.gross); }
     };
 
   selected.enter().insert('text')
