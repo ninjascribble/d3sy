@@ -17,7 +17,12 @@
     }
   };
 
-  var _duration = 400;
+  var _duration = 400,
+  formatters = {
+    monthly: d3.time.format('%b'),
+    daily: d3.time.format('%a'),
+    currency: d3.format('s')
+  };
 
   // Title
   var body = d3.select('body');
@@ -84,10 +89,10 @@
       point.insert('circle').attr('opacity',0).transition().delay(_duration).duration(_duration).attr('opacity',1);
       point.insert('text').attr('class', 'label').attr('opacity',0).transition().delay(_duration).duration(_duration).attr('opacity',1);
 
-    meta.selectAll('.xAxis').attr('y', sh - 5).attr('x', x).text(function(d, i) {
-      return d.date.toDateString();
+    meta.selectAll('.xAxis').attr('y', sh + 30).attr('x', x).text(function(d, i) {
+      return formatters[filter](d.date);
     });
-    meta.selectAll('circle').attr('cy', h).attr('cx', x).attr('r', 5)
+    meta.selectAll('circle').attr('cy', h).attr('cx', x).attr('r', 5).attr('style', 'fill: white; stroke: red');
     meta.selectAll('.label').attr('y', function (d) { return h(d)-10 }).attr('x', x).text(function(d, i) {
       return d.value;
     });
