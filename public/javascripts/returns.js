@@ -5,6 +5,7 @@ d3.select('body').append('h2').text('Returns');
 
 var _selector = d3.select('body').append('select').attr('id', 'returns-selector')
   , _stage = d3.select('body').append('svg').attr('id', 'returns').attr('height', 200)
+  , _group = _stage.append('g').attr('transform', 'translate(100, 100)')
   , _data = {
 
   	monthly: [
@@ -177,17 +178,12 @@ function getRange(data) {
 
 function renderPie(data, range) {
 
-  console.log(data);
-
-  var pie = d3.layout.pie().value(function(d) { console.log(d); return d.value; })
-    , selected = _stage.selectAll('path').data(pie)
-    , arc = d3.svg.arc().outerRadius(100);
+  var pie = d3.layout.pie().value(function(d) { return d.value; })
+    , arc = d3.svg.arc().outerRadius((parseInt(_stage.style('height')) - margin) / 2).innerRadius((parseInt(_stage.style('height')) - margin) / 3)
+    , selected = _group.selectAll('path').data(pie(data));
 
   selected.enter().insert('path')
-    .attr('x', 100)
-    .attr('y', 100)
     .attr('d', arc);
-
 }
 
 }());
