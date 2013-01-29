@@ -199,7 +199,7 @@ function renderTotal(data, range) {
     , barWidth = Math.ceil( (parseInt(_stage.style('width'))) / (data.length * 2) )
     , fn = {
       x: function(d, i) { return i * barWidth * 2 + barWidth * .75; },
-      y: function(d, i) { return floor - range(d.net) - range(d.gross - d.net) - parseInt(this.clientHeight) / 2; },
+      y: function(d, i) { return floor - range(d.net) - range(d.gross - d.net) + 2 - parseInt(this.clientHeight) / 2; },
       text: function(d, i) { return '$' + formatters.currency(d.gross); }
     };
 
@@ -207,16 +207,19 @@ function renderTotal(data, range) {
     .attr('class', 'total')
     .text(fn.text)
     .attr('x', fn.x)
-    .attr('y', fn.y)
+    .attr('y', floor)
     .attr('fill-opacity', 0);
 
   selected.transition()
     .delay(duration)
     .duration(duration)
+    .ease('back-out')
+    .attr('y', fn.y)
     .attr('fill-opacity', 1);
 
   selected.exit().transition()
     .duration(duration)
+    .attr('y', floor)
     .attr('fill-opacity', 0)
     .remove();
 }
