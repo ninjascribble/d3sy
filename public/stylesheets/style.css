@@ -13,8 +13,13 @@ body {
   /*shape-rendering: crispEdges;*/
 }
 
-svg {
+svg, pre, code {
     background-color: lightgray;
+}
+
+pre, code {
+    font: Consolas;
+    padding: 7px;
 }
 
 text {
