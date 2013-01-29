@@ -7,8 +7,8 @@
         "salesAmt": [80000, 130000, 100000, 140000, 150000, 130000, 200000]
       },
       "monthly": {
-        "promotionAmt": [100000, 50000, 125000, 150000, 100000, 130000, 50000],
-        "salesAmt": [80000, 130000, 100000, 140000, 150000, 130000, 200000]
+        "promotionAmt": [120000, 150000, 125000, 100000, 170000, 130000, 170000, 200000, 145000, 180000, 190000, 100000],
+        "salesAmt": [100000, 150000, 175000, 140000, 90000, 110000, 200000, 210000, 230000, 250000, 240000, 275000]
       }
     }
   };
@@ -47,16 +47,11 @@
   function update() {
 
     var height = parseInt(_stage.style('height')),
-      width = parseInt(_stage.style('width'));
+      width = parseInt(_stage.style('width')),
+      pathGroup;
 
     var filter = dropdown.property('value'),
-      data = filterData(filter);
-
-
-
-      meta = group.selectAll('g').data(data, function (d) { 
-          return d.date;
-      }),
+      data = filterData(filter),
       sw = width - (margin * 2),
       sh = height - (margin * 2),
       scaleX = d3.time.scale().range([0, sw])
@@ -76,23 +71,47 @@
       y = function(d, i) {
         return scaleY(d);
       },
-      flattenLine = d3.svg.line().x(function(d) { return current.scaleX(d.date); }).y(function(d) { return height / 2; }),
-      scaleXLine = d3.svg.line().x(function(d) { return x(d); }).y(function(d) { return height / 2; }),
+      
+      flattenLine = d3.svg.area().interpolate("cardinal").x(function(d) { 
+        console.log("flatten "+current.scaleX(d.date));
+        return current.scaleX(d.date); 
+      }).y0(height).y1(height),
+
+      scaleXLine = d3.svg.area().x(function(d) { 
+        console.log("scale "+x(d.date));
+        return x(d.date); 
+      }).y0(height).y1(height),
       calcArea = d3.svg.area().interpolate("cardinal").x(function(d) { 
+        console.log("calc "+x(d.date));
         return x(d.date); 
       }).y0(height).y1(function(d) { 
         return y(d.value); 
       });
 
-      var pathGroup = _stage.selectAll('.pathGroup')
-        .data(data)
-        .enter().append('g').attr('class','.pathGroup');
+      pathGroup = _stage.selectAll('.pathGroup').data(data);
 
-      pathGroup.append('path')
-        .attr('class', 'area')
+      pathGroup.enter().append('path')
+        .attr('class','pathGroup area')
+        .attr("transform", "translate(" + margin + "," + margin + ")");
+
+      if (current) {
+        pathGroup.transition().duration(_duration).delay(000).attr('d', function (d, i) { 
+          return flattenLine(current.data[i].values) 
+        });
+        //pathGroup.transition().duration(0).delay(_duration).attr('d', function (d, i) { return scaleXLine(d.values) });
+      }
+
+      pathGroup.transition().duration(_duration).delay(_duration)
         .attr('id', function (d) { return d.name })
-        .attr('d', function (d) { return calcArea(d.values) } )
+        .attr('d', function (d) { return calcArea(d.values) } );
 
+
+      // if(current) {
+      //   line.transition().duration(_duration).delay(000).attr('d', flattenLine(current.data));
+      //   line.transition().duration(0).delay(_duration).attr('d', scaleXLine(data));
+      // }
+
+      // line.transition().duration(_duration).delay(_duration * 1).attr('d', calcLine(data));
 
       //promotionLine.transition().duration(_duration).delay(_duration).attr('d', calcArea(data));
 
@@ -140,16 +159,30 @@
       
       break;
     case 'monthly':
-    default:
-      var obj;
-      for(i; i < data.length; i++) {
-        obj = {};
-        dates[i] = new Date();
-        dates[i].setMonth(dates[i].getMonth() - i);
-        obj.date = dates[i];
-        obj.value = data[i];
-        filteredData.push(obj);
-      }
+      var date;
+      var keyObj;
+      var pathObj;
+
+      for (var key in data) {
+        keyObj = {}
+        keyObj.name = key;
+        keyObj.values = [];
+
+        for(var i = 6; i > -1; i--) {
+          pathObj = {};
+          date = new Date();
+          date.setMonth(date.getMonth() - [i]);
+          date.setHours(0);
+          date.setMinutes(0);
+          date.setSeconds(0);
+          pathObj.date = date;
+          pathObj.value = data[key][i]
+
+          keyObj.values.push(pathObj);
+        }
+
+        filteredData.push(keyObj);
+      }        
       break;
     }
     filteredData.sort(function(a, b) {
