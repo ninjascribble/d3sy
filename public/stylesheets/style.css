@@ -19,6 +19,7 @@ svg, pre, code {
 
 pre, code {
     font: Consolas;
+    overflow: hidden;
     padding: 7px;
 }
 
