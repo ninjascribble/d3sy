@@ -16,7 +16,7 @@
     range.x.domain([0, 23]);
     range.x.range([0, parseInt(_stage.style('width'))]);
 
-    range.y.domain([50, 200]);
+    range.y.domain([450, 550]);
     range.y.range([parseInt(_stage.style('height')) - 20, 20]);
 
     for (var i = 0; i < 24 * 365; i++) {
@@ -27,7 +27,7 @@
 
     function step() {
         
-        var data = XYZ.model[_filter];
+        var data = XYZ.model['foot-traffic'][_filter];
 
         data = unshift(data);
         renderPath(data);
@@ -56,10 +56,10 @@
 
         var line = d3.svg.line();
             line.x(function(d, i) { return range.x(i) });
-            line.y(function(d, i) { return range.y(d.value) });
+            line.y(function(d, i) { return range.y(d.values[0].value) });
 
         if (_needsTranslation == false) {
-            _line.attr('d', line(data));
+            _line.transition().attr('d', line(data));
         }
         else {
             _line.attr('d', line(data))
