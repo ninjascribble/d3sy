@@ -29,11 +29,7 @@ function update() {
     rects.enter().insert('rect')
         .attr('y', sh)
         .attr('x', x)
-        .attr('width', rw)
-        .transition()
-            .duration(_duration)
-            .attr('y', y)
-            .attr('height', h);
+        .attr('width', rw);
 
     rects.transition()
         .duration(_duration)
