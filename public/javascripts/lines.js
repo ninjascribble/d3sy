@@ -31,13 +31,13 @@
 
         data = unshift(data);
         renderPath(data);
-        _cache = shift(data);
+        _cache = shift(data).concat([]);
 
         XYZ.step();
     }
 
     function unshift(data) {
-        if (_cache && _cache.length > 0) {
+        if (_cache.length > 0 && _cache[0] !== data[0]) {
             data.unshift(_cache[0]);
             _needsTranslation = true;
         }
@@ -45,10 +45,10 @@
     }
 
     function shift(data) {
-        if (_cache && _cache.length > 0) {
+        if (_needsTranslation == true) {
             data.shift();
+            _needsTranslation = false;
         }
-        _needsTranslation = false;
         return data;
     }
 
