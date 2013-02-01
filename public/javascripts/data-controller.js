@@ -18,5 +18,4 @@
 		XYZ.step();
 		_root.text(JSON.stringify(XYZ.model, 0, 2));
 	}
-
 }());
