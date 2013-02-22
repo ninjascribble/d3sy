@@ -27,6 +27,10 @@ text {
   text-anchor: middle;
 }
 
+#arc path {
+  stroke: none;
+}
+
 path {
   fill: none;
   stroke: steelblue;
