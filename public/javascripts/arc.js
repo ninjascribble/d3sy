@@ -66,8 +66,8 @@ var data = {
 d3.select('body').append('h2').text('Arc');
 
 var _selector = d3.select('body').append('select').attr('id', 'arc-selector')
-  , _stage = d3.select('body').append('svg').attr('id', 'arc').attr('height', 200)
-  , _group = _stage.append('g').attr('transform', 'translate(100, 100)')
+  , _stage = d3.select('body').append('svg').attr('id', 'arc').attr('height', 800)
+  , _group = _stage.append('g').attr('transform', 'translate(600, 400)')
   , _data = data.client.portfolio
   , _colors = ["#40000", "#660000", "8C0000", "B22222"];
   
@@ -98,7 +98,7 @@ function update(idx) {
     , range = getRange(data);
 
   renderPie(data, range);
-  // renderLabels(data, range);
+
 }
 
 function getRange(data) {
@@ -119,17 +119,40 @@ function getRange(data) {
   return result;
 }
 
+var pie, arc;
+
 function renderPie(data, range) {
 
-  var pie = d3.layout.pie().value(function(d) { return d.value; })
-    , arc = d3.svg.arc().outerRadius((parseInt(_stage.style('height')) - margin) / 2).innerRadius((parseInt(_stage.style('height')) - margin) / 3)
-    , selected = _group.selectAll('path').data(pie(data));
+  pie = d3.layout.pie().sort(null).value(function(d) { return d.value; });
+  arc = d3.svg.arc().outerRadius((parseInt(_stage.style('height')) - margin) / 2).innerRadius((parseInt(_stage.style('height')) - margin) / 3);
+    
+  var selected = _group.selectAll('path').data(pie(data));
 
   selected.enter().insert('path').style('fill', function(d, i) { 
         return color(i)
     });
+
   selected.transition().duration(duration).attr('d', arc);
+
+  renderLabels(data, range);
 }
+function renderLabels(data, range) {
+
+  var selected = _group.selectAll('text.label').data(pie(data));
+
+  selected.enter().insert('text').attr('class', 'label');
+
+  selected.transition().duration(duration).attr('x', function (d) {
+    return arc.centroid(d)[0]
+  })
+  .attr('y', function (d) {
+    return arc.centroid(d)[1]
+  })
+  .text(function (d) {
+    return d.data.category+' - $'+d.data.value
+  });
+}
+
 
 
 }());

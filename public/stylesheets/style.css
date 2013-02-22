@@ -31,6 +31,15 @@ text {
   stroke: none;
 }
 
+#arc .label {
+  fill: black;
+  stroke: white;
+  stroke-width: 1px;
+  font-size: 40px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
 path {
   fill: none;
   stroke: steelblue;
