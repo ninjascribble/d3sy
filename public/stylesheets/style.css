@@ -39,6 +39,9 @@ text {
   font-weight: bold;
   text-transform: uppercase;
 }
+#arc .labelPath {
+  stroke: black;
+}
 
 path {
   fill: none;

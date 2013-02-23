@@ -65,7 +65,10 @@ var data = {
 // Build the DOM
 d3.select('body').append('h2').text('Arc');
 
+
 var _selector = d3.select('body').append('select').attr('id', 'arc-selector')
+  , _slider = d3.select('body').append('input').attr('type','range').attr('min','0').attr('max','360')
+  , _sliderLabel = d3.select('body').append('p').attr('class','sliderLabel')
   , _stage = d3.select('body').append('svg').attr('id', 'arc').attr('height', 800)
   , _group = _stage.append('g').attr('transform', 'translate(600, 400)')
   , _data = data.client.portfolio
@@ -80,6 +83,11 @@ _selector.on('change', function() {
     update(this.value)
 });
 
+_slider.on('change', function () {
+    _sliderLabel.text(this.value);
+    update(0, this.value);
+});
+
 // Stash the moving parts of the chart
 var margin = 20
   , duration = 300
@@ -92,12 +100,13 @@ var margin = 20
 
 update(0);
 
-function update(idx) {
+function update(idx, rotation) {
 
     var data = _data[idx].allocations
-    , range = getRange(data);
+    , range = getRange(data)
+    , rotation = rotation ? rotation : 0;
 
-  renderPie(data, range);
+  renderPie(data, range, rotation);
 
 }
 
@@ -121,7 +130,7 @@ function getRange(data) {
 
 var pie, arc;
 
-function renderPie(data, range) {
+function renderPie(data, range, rotation) {
 
   pie = d3.layout.pie().sort(null).value(function(d) { return d.value; });
   arc = d3.svg.arc().outerRadius((parseInt(_stage.style('height')) - margin) / 2).innerRadius((parseInt(_stage.style('height')) - margin) / 3);
@@ -132,17 +141,28 @@ function renderPie(data, range) {
         return color(i)
     });
 
-  selected.transition().duration(duration).attr('d', arc);
+  selected.transition().duration(duration).attr('d', arc).attr('transform', 'rotate('+rotation+' 0 0)');
 
   renderLabels(data, range);
 }
+
+function arcTween(a) {
+  var i = d3.interpolate(this._current, a);
+  this._current = i(0);
+  return function(t) {
+    return arc(i(t));
+  };
+}
+
 function renderLabels(data, range) {
 
-  var selected = _group.selectAll('text.label').data(pie(data));
+  var selectedText = _group.selectAll('text.label').data(pie(data));
+  var selectedPath = _group.selectAll('path.labelPath').data(pie(data));
 
-  selected.enter().insert('text').attr('class', 'label');
+  selectedText.enter().insert('text').attr('class', 'label');
+  selectedPath.enter().insert('svg:line').attr('class','labelPath');
 
-  selected.transition().duration(duration).attr('x', function (d) {
+  selectedText.transition().duration(duration).attr('x', function (d) {
     return arc.centroid(d)[0]
   })
   .attr('y', function (d) {
@@ -151,8 +171,29 @@ function renderLabels(data, range) {
   .text(function (d) {
     return d.data.category+' - $'+d.data.value
   });
+
+  selectedPath.transition().duration(duration)
+  .attr('x0', function (d) { 
+    return arc.centroid(d)[0] 
+  }).attr('x1', function(d) {
+    return arc.centroid(d)[0]*1.5
+  }).attr('y0', function (d) { 
+    return arc.centroid(d)[1] 
+  }).attr('y1', function(d) {
+    return arc.centroid(d)[1]*1.5
+  })
 }
 
+// function rotatePie(degree) {
+//    var thePie = _group.selectAll('path').data(pie(data));
+//    var theLabel = _group.selectAll('text.label').data(pie(data));
+//    var thePath = _group.selectAll('path.labelPath').data(pie(data));
+
+
+//     //rotate pie
+//     thePie.transition().attr('transform', 'rotateX('+degree+'deg)');
+
+// }
 
 
 }());
