@@ -109,7 +109,7 @@
         _data = data.client.portfolio,
         _colors = ["#40000", "#660000", "8C0000", "B22222"],
 
-        _rotation = 0;
+        _rotation = { selectPoint: 0, rotate: 0 };
 
     // Configure the data selector
     for(var i = 0, len = _data.length; i < len; i++) {
@@ -122,14 +122,17 @@
     });
 
     _snap.on('click', function() {  
-        snapToPoint(arcs, _rotation); 
+        snapToPoint(arcs, parseInt(_rotation.selectPoint)); 
     });
 
     _slider.on('change', function() {
+        _rotation.rotate = this.value;
+
         var value = Math.abs(parseInt(this.value) - 450);
-        _rotation = (value >= 360) ? value - 360 : value;
-        _sliderLabel.text(this.value);
-        update(0, this.value);
+        _rotation.selectPoint = (value >= 360) ? value - 360 : value;
+
+        _sliderLabel.text(JSON.stringify(_rotation));
+        rotatePie();
     });
 
     // Stash the moving parts of the chart
@@ -142,17 +145,15 @@
         },
         color = d3.scale.ordinal().range(_colors);
 
-    update(0, _rotation);
+    update(0);
 
     _group.insert('svg:line').attr('class','selectPath').attr('stroke', 'black').attr('strokeWidth', 3).attr('x0', 0).attr('y0',0).attr('x1', 500).attr('y1', 0);
 
-    function update(idx, rotation) {
+    function update(idx) {
 
         var data = _data[idx].allocations,
-            range = getRange(data),
-            rotation = rotation ? rotation : 0;
-
-        renderPie(data, range, rotation);
+            range = getRange(data);
+        renderPie(data, range);
 
     }
 
@@ -172,130 +173,46 @@
         return result;
     }
 
-    var pie, arc, selected, globalData;
+    var pie, arc, selected;
 
-    function renderPie(data, range, rotation) {
+    function renderPie(data, range) {
 
         pie = d3.layout.pie().sort(null).value(function(d) {
             return d.value;
         });
-        arc = d3.svg.arc().outerRadius((parseInt(_stage.style('height')) - margin) / 2)//.innerRadius((parseInt(_stage.style('height')) - margin) / 3);
+        arc = d3.svg.arc().outerRadius((parseInt(_stage.style('height')) - margin) / 2).innerRadius((parseInt(_stage.style('height')) - margin) / 3);
         selected = _group.selectAll('path').data(pie(data));
-
-
-        globalData = pie(data);
 
         selected.enter().insert('path').style('fill', function(d, i) {
             return color(i)
         });
 
         arcs = selected.attr('d', arc);
-        arcs.attr('transform', 'rotate(' + rotation + ' 0 0)');
-
-        if (d3.select('line.rotateLine')[0][0] !== null) {
-            var midPath = d3.select('line.rotateLine');
-            var rotateText = d3.select('text.rotation');
-        }
-        else {
-            var midPath = _group.insert('svg:line').attr('class','rotateLine').attr('stroke', 'blue').attr('strokeWidth', 3).attr('x0', 0).attr('y0',0).attr('x1', 0).attr('y1', 300);
-            var rotateText = _group.insert('text').attr('class','rotation').attr('stroke', 'blue').attr('strokeWidth', 3).attr('x', 0).attr('y', -300);
-        }
         
-        midPath.attr('transform', 'rotate(' + rotation + ' 0 0)');
-        rotateText.text('angle = '+rotation)
-            
+    }
 
-
-        //renderLabels(data, range, rotation);
+    function rotatePie() {
+        arcs.attr('transform', 'rotate(' + _rotation.rotate + ' 0 0)');
     }
 
     function selectedArc(rotation) {
-        // var angleArray = []
-        //   , obj = {};
-        // pie(data).forEach(function(element, index, array) {
-        //   obj = {};
-        //   obj.startAngle = element.startAngle * 180 / Math.PI;
-        //   obj.endAngle = element.endAngle * 180 / Math.PI;
-        //   angleArray.push(obj)
-        // });
-        // rotation = rotation - 180;
-
-        // rotation = rotation <= 0 ? rotation + 360 : rotation;
-
         var rotationRads = rotation * Math.PI / 180;
         var selected;
-        arcs[0].forEach(function(element, index, array) {
-            element = element.__data__;
-            if (element.startAngle <= rotationRads && element.endAngle >= rotationRads) {
-                element.midPoint = Math.abs(element.endAngle + element.startAngle) / 2;
-                console.log('selected - '+element.midPoint)
-                selected = element;                
+        arcs.each(function(val, i) {
+            if (val.startAngle <= rotationRads && val.endAngle >= rotationRads) {
+                val.midPoint = (val.endAngle + val.startAngle) / 2 * 180 / Math.PI;
+                selected = val;
+                return val;             
             }
-        });
+        })
         return selected;
-    }
-
-    function arcTween(a) {
-        var i = d3.interpolate(this._current, a);
-        this._current = i(0);
-        return function(t) {
-            return arc(i(t));
-        };
     }
 
     function snapToPoint(arcs, rotation) {
         var selected = selectedArc(rotation);
-        var rotateTo = Math.abs(selected.midPoint * 180 / Math.PI - 450);
+        var rotateTo = Math.abs(selected.midPoint - 450);
         rotateTo = rotateTo >= 360 ? rotateTo - 360 : rotateTo;
         arcs.transition().duration(500).attr('transform', 'rotate(' + rotateTo + ' 0 0)');
-
-        if (d3.select('line.midPath')[0][0] !== null) {
-            var midPath = d3.select('line.midPath');
-            var rotateText = d3.select('text.rotateTo');
-        }
-        else {
-            var midPath = _group.insert('svg:line').attr('class','midPath').attr('stroke', 'green').attr('strokeWidth', 3).attr('x0', 0).attr('y0',0).attr('x1', 0).attr('y1', 300);
-            var rotateText = _group.insert('text').attr('class','rotateTo').attr('stroke', 'green').attr('strokeWidth', 3).attr('x', 0).attr('y', 0);
-        }
-        
-        midPath.attr('transform', 'rotate(' + rotateTo + ' 0 0)');
-        rotateText.text('angle = '+rotateTo)
     }
-
-    function renderLabels(data, range) {
-
-        var selectedText = _group.selectAll('text.label').data(pie(data));
-        var selectedPath = _group.selectAll('path.labelPath').data(pie(data));
-
-        selectedText.enter().insert('text').attr('class', 'label');
-        selectedPath.enter().insert('svg:line').attr('class', 'labelPath');
-
-        selectedText.transition().duration(duration).attr('x', function(d) {
-            return arc.centroid(d)[0]
-        }).attr('y', function(d) {
-            return arc.centroid(d)[1]
-        }).text(function(d) {
-            return d.data.category + ' - $' + d.data.value
-        });
-
-        selectedPath.transition().duration(duration).attr('x0', function(d) {
-            return arc.centroid(d)[0]
-        }).attr('x1', function(d) {
-            return arc.centroid(d)[0] * 1.5
-        }).attr('y0', function(d) {
-            return arc.centroid(d)[1]
-        }).attr('y1', function(d) {
-            return arc.centroid(d)[1] * 1.5
-        })
-    }
-
-    // function rotatePie(degree) {
-    //    var thePie = _group.selectAll('path').data(pie(data));
-    //    var theLabel = _group.selectAll('text.label').data(pie(data));
-    //    var thePath = _group.selectAll('path.labelPath').data(pie(data));
-
-    //     //rotate pie
-    //     thePie.transition().attr('transform', 'rotateX('+degree+'deg)');
-    // }
 
 // }());
