@@ -195,8 +195,8 @@
         arcs.attr('transform', 'rotate(' + _rotation.rotate + ' 0 0)');
     }
 
-    function selectedArc(rotation) {
-        var rotationRads = rotation * Math.PI / 180;
+    function selectedArc() {
+        var rotationRads = _rotation.selectPoint * Math.PI / 180;
         var selected;
         arcs.each(function(val, i) {
             if (val.startAngle <= rotationRads && val.endAngle >= rotationRads) {
@@ -208,8 +208,8 @@
         return selected;
     }
 
-    function snapToPoint(arcs, rotation) {
-        var selected = selectedArc(rotation);
+    function snapToPoint() {
+        var selected = selectedArc();
         var rotateTo = Math.abs(selected.midPoint - 450);
         rotateTo = rotateTo >= 360 ? rotateTo - 360 : rotateTo;
         arcs.transition().duration(500).attr('transform', 'rotate(' + rotateTo + ' 0 0)');
