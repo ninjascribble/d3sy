@@ -7,33 +7,26 @@ var MONTHS = [ 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'O
 d3.select('body').append('h2').text('Revenue vs. Projected Revenue');
 
 var _selector = d3.select('body').append('select').attr('id', 'revenue-selector')
-  , _stage = d3.select('body').append('svg').attr('id', 'revenue').attr('height', 200)
-  , _netLine = _stage.append('path').attr('id','netLine')
+  , _stage = d3.select('body').append('svg').attr('id', 'revenue').attr('height', 800)
+  , _bars = _stage.append('g').attr('id','bar-group')
+  , _lines = _stage.append('g').attr('id','line-group')
+  , _netLine = _lines.append('path').attr('id','net-line')
+  , _grossLine = _lines.append('path').attr('id','gross-line')
   , _data = {
 
     monthly: [
-      { time: new Date('1/31/2012'),  gross: 1100000, net: 980000 },
-      { time: new Date('2/28/2012'),  gross:  772000, net: 680000 },
-      { time: new Date('3/31/2012'),  gross:  805000, net: 710000 },
-      { time: new Date('4/30/2012'),  gross:  727000, net: 670000 },
-      { time: new Date('5/31/2012'),  gross:  731000, net: 641000 },
-      { time: new Date('6/30/2012'),  gross:  728000, net: 680000 },
-      { time: new Date('7/31/2012'),  gross:  858000, net: 790000 },
-      { time: new Date('8/31/2012'),  gross:  864000, net: 740000 },
-      { time: new Date('9/30/2012'),  gross:  716000, net: 670000 },
-      { time: new Date('10/31/2012'), gross:  719000, net: 675000 },
-      { time: new Date('11/30/2012'), gross:  979000, net: 812000 },
-      { time: new Date('12/31/2012'), gross: 1300000, net: 980000 }
-    ],
-
-    daily: [
-      { time: new Date('1/1/2012'), gross: 35483, net: 34232 },
-      { time: new Date('1/2/2012'), gross: 32433, net: 31252 },
-      { time: new Date('1/3/2012'), gross: 33421, net: 32552 },
-      { time: new Date('1/4/2012'), gross: 33823, net: 30124 },
-      { time: new Date('1/5/2012'), gross: 31234, net: 30021 },
-      { time: new Date('1/6/2012'), gross: 30234, net: 28412 },
-      { time: new Date('1/7/2012'), gross: 34214, net: 32413 }
+      { time: new Date('1/31/2012'),  gross: 5000, net: 4500 },
+      { time: new Date('2/28/2012'),  gross:  5500, net: 4900 },
+      { time: new Date('3/31/2012'),  gross:  5700, net: 5300 },
+      { time: new Date('4/30/2012'),  gross:  6500, net: 5800 },
+      { time: new Date('5/31/2012'),  gross:  7800, net: 6500 },
+      { time: new Date('6/30/2012'),  gross:  7900, net: 6600 },
+      { time: new Date('7/31/2012'),  gross:  9500, net: 7000 },
+      { time: new Date('8/31/2012'),  gross:  10000, net: 7500 },
+      { time: new Date('9/30/2012'),  gross:  12000, net: 9000 },
+      { time: new Date('10/31/2012'), gross:  12500, net: 9500 },
+      { time: new Date('11/30/2012'), gross:  20000, net: 15000 },
+      { time: new Date('12/31/2012'), gross: 22000, net: 17000 }
     ]
   };
 
@@ -75,6 +68,7 @@ function update(type) {
   renderNet(data, range);
   renderGross(data, range);
   renderNetLine(data, range);
+  renderGrossLine(data, range);
   renderLabel(data, range);
 }
 
@@ -98,7 +92,7 @@ function getRange(data) {
 
 function renderNet(data, range) {
 
-  var selected = _stage.selectAll('rect.net').data(data, function(d) { return d.time.toUTCString(); })
+  var selected = _bars.selectAll('rect.net').data(data, function(d) { return d.time.toUTCString(); })
     , floor = parseInt(_stage.style('height')) - margin
     , barWidth = Math.ceil( (parseInt(_stage.style('width'))) / (data.length * 2) )
     , fn = {
@@ -132,7 +126,7 @@ function renderNet(data, range) {
 
 function renderGross(data, range) {
 
-  var selected = _stage.selectAll('rect.gross').data(data, function(d) { return d.time.toUTCString(); })
+  var selected = _bars.selectAll('rect.gross').data(data, function(d) { return d.time.toUTCString(); })
     , floor = parseInt(_stage.style('height')) - margin
     , barWidth = Math.ceil( (parseInt(_stage.style('width'))) / (data.length * 2) )
     , fn = {
@@ -166,7 +160,7 @@ function renderGross(data, range) {
 
 function renderLabel(data, range) {
 
-  var selected = _stage.selectAll('text.label').data(data, function(d) { return d.time.toUTCString(); })
+  var selected = _bars.selectAll('text.label').data(data, function(d) { return d.time.toUTCString(); })
     , floor = parseInt(_stage.style('height')) - margin
     , barWidth = Math.ceil( (parseInt(_stage.style('width'))) / (data.length * 2) )
     , fn = {
@@ -198,12 +192,23 @@ function renderNetLine(data, range) {
   var selected = _netLine
     , floor = parseInt(_stage.style('height')) - margin
     , barWidth = Math.ceil( (parseInt(_stage.style('width'))) / (data.length * 2) )
-    , line = d3.svg.line().interpolate('cardinal')
-      .x(function(d, i) { return i * barWidth * 2 + barWidth / 4 })
+    , line = d3.svg.line().interpolate('basis')
+      .x(function(d, i) { return i * barWidth * 2 + barWidth / 2})
       .y(function(d, i) { return floor - range(d.net); });
 
       selected.attr('d', line(data))
 }
 
+function renderGrossLine(data, range) {
+
+  var selected = _grossLine
+    , floor = parseInt(_stage.style('height')) - margin
+    , barWidth = Math.ceil( (parseInt(_stage.style('width'))) / (data.length * 2) )
+    , line = d3.svg.line().interpolate('basis')
+      .x(function(d, i) { return i * barWidth * 2 + (barWidth)})
+      .y(function(d, i) { return floor - range(d.gross); });
+
+      selected.attr('d', line(data))
+}
 
 }());
