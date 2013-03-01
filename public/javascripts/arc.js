@@ -1,5 +1,5 @@
-// ;
-// (function() {
+;
+(function() {
     var data = {
         client: {
 
@@ -215,4 +215,4 @@
         arcs.transition().duration(500).attr('transform', 'rotate(' + rotateTo + ' 0 0)');
     }
 
-// }());
+}());
