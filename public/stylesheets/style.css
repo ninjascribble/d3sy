@@ -76,7 +76,7 @@ path.area {
   stroke-width: 2px;
 }
 
-.RdYlGn .q0-11, .q0-11 {fill:rgb(165,0,38)}
+/*.RdYlGn .q0-11, .q0-11 {fill:rgb(165,0,38)}
 .RdYlGn .q1-11, .q1-11 {fill:rgb(215,48,39)}
 .RdYlGn .q2-11, .q2-11 {fill:rgb(244,109,67)}
 .RdYlGn .q3-11, .q3-11 {fill:rgb(253,174,97)}
@@ -86,7 +86,7 @@ path.area {
 .RdYlGn .q7-11, .q7-11 {fill:rgb(166,217,106)}
 .RdYlGn .q8-11, .q8-11 {fill:rgb(102,189,99)}
 .RdYlGn .q9-11, .q9-11 {fill:rgb(26,152,80)}
-.RdYlGn .q10-1, .q10-11 {fill:rgb(0,104,55)}
+.RdYlGn .q10-1, .q10-11 {fill:rgb(0,104,55)}*/
 
 .chart rect {
    fill: steelblue;
