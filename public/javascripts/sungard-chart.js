@@ -10,18 +10,15 @@ d3.select('body').append('h2').text('Revenue vs. Projected Revenue');
 var _selector = d3.select('body').append('select').attr('id', 'planning-selector')
   , _stage = d3.select('body').append('svg').attr('id', 'planning').attr('height', 800)
   , data = [
-      { time: new Date('1/31/2012'),  data: { net: 4500, gross: 5000 }},
-      { time: new Date('2/28/2012'),  data: { net: 4900, gross:  5500 }},
-      { time: new Date('3/31/2012'),  data: { net: 5300, gross:  5700 }},
-      { time: new Date('4/30/2012'),  data: { net: 5800, gross:  6500 }},
-      { time: new Date('5/31/2012'),  data: { net: 6500, gross:  7800 }},
-      { time: new Date('6/30/2012'),  data: { net: 6600, gross:  7900 }},
-      { time: new Date('7/31/2012'),  data: { net: 7000, gross:  9500 }},
-      { time: new Date('8/31/2012'),  data: { net: 7500, gross:  10000 }},
-      { time: new Date('9/30/2012'),  data: { net: 9000, gross:  12000 }},
-      { time: new Date('10/31/2012'), data: { net: 9500, gross:  12500 }},
-      { time: new Date('11/30/2012'), data: { net: 15000, gross:  20000 }},
-      { time: new Date('12/31/2012'), data: { net: 17000, gross: 22000 }}
+      { time: new Date('1/1/2010'),  data: { afterTaxLiving: 955.24,    gross: 2868.51,  afterTax: 2358.24,  afterTaxLivingHealth: 355.24} },
+      { time: new Date('1/1/2015'),  data: { afterTaxLiving: 1546.33,   gross: 3661.03,  afterTax: 3031.88,  afterTaxLivingHealth: 946.33} },
+      { time: new Date('1/1/2020'),  data: { afterTaxLiving: 2318.67,   gross: 4672.50,  afterTax: 3891.63,  afterTaxLivingHealth: 1718.67} },
+      { time: new Date('1/1/2025'),  data: { afterTaxLiving: 3323.41,   gross: 5963.43,  afterTax: 4988.92,  afterTaxLivingHealth: 2723.41} },
+      { time: new Date('1/1/2030'),  data: { afterTaxLiving: 4625.87,   gross: 7611.02,  afterTax: 6389.36,  afterTaxLivingHealth: 4025.87} },
+      { time: new Date('1/1/2035'),  data: { afterTaxLiving: 6309.47,   gross: 9713.80,  afterTax: 8176.73,  afterTaxLivingHealth: 5709.47} },
+      { time: new Date('1/1/2040'),  data: { afterTaxLiving: 8480.79,   gross: 12397.55, afterTax: 10457.91, afterTaxLivingHealth: 7880.79} },
+      { time: new Date('1/1/2045'),  data: { afterTaxLiving: 11275.89,  gross: 15822.76, afterTax: 13369.35, afterTaxLivingHealth: 10675.89} },
+      { time: new Date('1/1/2050'),  data: { afterTaxLiving: 14868.52,  gross: 20194.30, afterTax: 17085.15, afterTaxLivingHealth: 14268.53} }
     ];
 
 var margin = 20
@@ -69,20 +66,38 @@ function _render() {
 function _dataPrep(data) {
   var obj = { 
     keyCount: 0, 
-    data: {} 
+    data: { bars: {}, lines: {} } 
   };
-  var innerObj;
+  var displayType, innerObj;
 
 
   for (var key in data[0].data) {
-    obj.data[key] = [];
+
+
+    if (key == "afterTaxLiving" || key == "gross") {
+      obj.data.bars[key] = [];
+
+      for (var i = 0; i < data.length; i++) {
+        innerObj = {};
+        innerObj.time = data[i].time;
+        innerObj.value = data[i].data[key]      
+        obj.data.bars[key].push(innerObj);
+      };      
+    }
+
+    if (key == "afterTax" || key == "afterTaxLivingHealth") {
+      obj.data.lines[key] = [];
+
+      for (var i = 0; i < data.length; i++) {
+        innerObj = {};
+        innerObj.time = data[i].time;
+        innerObj.value = data[i].data[key]      
+        obj.data.lines[key].push(innerObj);
+      };  
+    }
+
     obj.keyCount++;
-    for (var i = 0; i < data.length; i++) {
-      innerObj = {};
-      innerObj.time = data[i].time;
-      innerObj.value = data[i].data[key]
-      obj.data[key].push(innerObj)
-    };
+
   }
 
   return obj;
@@ -92,16 +107,22 @@ function update() {
 
   _data = _dataPrep(data);
 
-  _barWidth = Math.ceil( (space.width) / (data.length * (_data.keyCount+1)));
+  _barWidth = Math.ceil( (space.width) / (data.length * ((_data.keyCount/2)+1)));
   _range = getRange(data);
 
   var idx = 0;
 
-  for (var key in _data.data) {
+  for (var key in _data.data.bars) {
+    _renderKey(_data,key, idx);
     _renderBarGraph(_data, key, idx);
-    _renderLine(_data, key, idx);
-    //_renderKey(_data,key, idx);
+    idx++;
+  }
 
+  idx = 0;
+
+  for (var key in _data.data.lines) {
+    _renderLine(_data, key, idx);
+    _renderKey(_data,key, idx);
     idx++;
   }
 }
@@ -129,12 +150,12 @@ function getRange(data) {
 
 function _renderBarGraph(data, key, idx) {  
 
-  var selected = _bars.selectAll('rect.bar-'+key).data(data.data[key], function(d) { return d.time.toUTCString(); })
+  var selected = _bars.selectAll('rect.bar-'+key).data(data.data.bars[key], function(d) { return d.time.toUTCString(); })
     , floor = space.height - space.margin
     , fn = {
       x: function(d, i) {
         // time division + index division
-       return (i * _barWidth * (_data.keyCount+1)) + (_barWidth * idx)
+       return (i * _barWidth * ((_data.keyCount/2)+1)) + (_barWidth * idx)
       },
       y: function(d, i) { return floor - _range(d.value); },
       h: function(d, i) { return _range(d.value); },
@@ -170,11 +191,11 @@ function _renderLine(data, key, idx) {
     , floor = space.height - space.margin
     , line = d3.svg.line().interpolate('basis')
       .x(function(d, i) { 
-        return (i * _barWidth * (_data.keyCount+1)) + (_barWidth * idx) + (_barWidth / 2);
+        return (i * _barWidth * ((_data.keyCount/2)+1)) + (_barWidth * idx) + (_barWidth / 2);
       })
       .y(function(d, i) { return floor - _range(d.value); });
 
-      selected.attr('d', line(data.data[key])).attr('stroke', COLORS[idx+2])
+      selected.attr('d', line(data.data.lines[key])).attr('stroke', COLORS[idx+2])
 }
 function _renderKey(data, key, idx) {
   var selected = _values.append('g').attr('id','keyvalue-'+key)
