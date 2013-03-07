@@ -1,4 +1,4 @@
-;(function() {
+//;(function() {
 
 var MONTHS = [ 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC' ]
   , DAYS = [ 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT' ]
@@ -59,6 +59,7 @@ function _render() {
   _lines = _stage.append('g').attr('id','line-group');
   _values = d3.select('body').append('svg').attr('id','planning-values').attr('height', 200)  ;
 
+  _stage.on('mousemove', _mousemove);
 
 
   update()
@@ -104,10 +105,9 @@ function update() {
       _renderBarGraph(_data, i);
     if (_data[i].displayType == "line")
       _renderLine(_data, i);
-
-    //_renderKey(_data, i);
   }
 
+  _renderKey(_data);
 }
 
 function getRange(data) {
@@ -178,18 +178,45 @@ function _renderLine(data, idx) {
     , floor = space.height - space.margin
     , line = d3.svg.line().interpolate('basis')
       .x(function(d, i) { 
-        return (i * _barWidth * ((_data.length/2)+1)) + (_barWidth * (idx-(_data.length/2))) + (_barWidth / 2);
+        return (i * _barWidth * ((_data.length/2)+1)) + (_barWidth * (idx-(_data.length/2)))   + (_barWidth / 2);
       })
       .y(function(d, i) { return floor - _range(d.value); });
 
       selected.attr('d', line(data[idx].data)).attr('stroke', COLORS[idx+2])
 }
-function _renderKey(data, key, idx) {
-  // var selected = _values.append('g').attr('id','keyvalue-'+key).data();
 
-  // selected.selectAll('svg:circle').enter().append('svg:circle');
-  // selected.selectAll('svg:text.value').enter().append('svg:text').attr('class','value');
-  // selected.selectAll('svg:text.label').enter().append('svg:text').attr('class','label');
+function _renderKey(data, i) {
+
+  if (!i) i = 0;
+
+  var height = parseInt(_values.attr('height'));
+
+  var selected = _values.selectAll('g').data(data);
+
+  var keyItem = selected.enter().insert('g')
+                  .attr('data-keyIndex', function (d, i) { return i; })
+                  .attr('data-keyName', function (d, i) { return d.key; })
+                  .attr('class', 'keyItem')
+                  .attr('transform', function (d, i) { return 'translate(' + (i * _barWidth * 4 + 100) + ', ' + height / 2 + ')' })
+
+  var circles = keyItem.append('svg:circle').attr('r',50).attr('fill',function (d, i) { return COLORS[i] });
+  var amounts = keyItem.append('svg:text').attr('class','amount').attr('y', 60);
+  var labels = keyItem.append('svg:text').attr('class','label').text(function (d) { return d.key });
+
+  selected.transition().selectAll('text.amount').text(function (d) { 
+    return d.data[i].value })
+
 }
 
-}());
+var spaceXScale = d3.scale.linear().range([0, space.width]);
+var dataXScale = d3.scale.linear().domain([0, 1]).range([0, data.length]);
+
+
+function _mousemove() {
+  var x0 = spaceXScale.invert(d3.mouse(this)[0]);  
+  var i = Math.floor(dataXScale(x0));
+  console.log('i = '+i)
+  _renderKey(_data, i);
+}
+
+// }());
