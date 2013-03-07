@@ -64,67 +64,50 @@ function _render() {
   update()
 }
 function _dataPrep(data) {
-  var obj = { 
-    keyCount: 0, 
-    data: { bars: {}, lines: {} } 
-  };
-  var displayType, innerObj;
+  var theArray = [];
 
+  var displayType, innerObj;
 
   for (var key in data[0].data) {
 
+    obj = { key: key, data: [] }
 
-    if (key == "afterTaxLiving" || key == "gross") {
-      obj.data.bars[key] = [];
+    if (key == "afterTaxLiving" || key == "gross")
+      obj.displayType = 'bar';
 
-      for (var i = 0; i < data.length; i++) {
-        innerObj = {};
-        innerObj.time = data[i].time;
-        innerObj.value = data[i].data[key]      
-        obj.data.bars[key].push(innerObj);
-      };      
-    }
+    if (key == "afterTax" || key == "afterTaxLivingHealth")
+      obj.displayType = 'line';
 
-    if (key == "afterTax" || key == "afterTaxLivingHealth") {
-      obj.data.lines[key] = [];
+    for (var i = 0; i < data.length; i++) {
+      innerObj = {};
+      innerObj.time = data[i].time;
+      innerObj.value = data[i].data[key];      
+      obj.data.push(innerObj);
+    };
 
-      for (var i = 0; i < data.length; i++) {
-        innerObj = {};
-        innerObj.time = data[i].time;
-        innerObj.value = data[i].data[key]      
-        obj.data.lines[key].push(innerObj);
-      };  
-    }
-
-    obj.keyCount++;
+    theArray.push(obj);
 
   }
 
-  return obj;
+  return theArray;
 }
 
 function update() {
 
   _data = _dataPrep(data);
 
-  _barWidth = Math.ceil( (space.width) / (data.length * ((_data.keyCount/2)+1)));
+  _barWidth = Math.ceil( (space.width) / (data.length * ((_data.length/2)+1)));
   _range = getRange(data);
 
-  var idx = 0;
+  for (var i = 0, len = _data.length; i < len; i++) {
+    if (_data[i].displayType == "bar")
+      _renderBarGraph(_data, i);
+    if (_data[i].displayType == "line")
+      _renderLine(_data, i);
 
-  for (var key in _data.data.bars) {
-    _renderKey(_data,key, idx);
-    _renderBarGraph(_data, key, idx);
-    idx++;
+    //_renderKey(_data, i);
   }
 
-  idx = 0;
-
-  for (var key in _data.data.lines) {
-    _renderLine(_data, key, idx);
-    _renderKey(_data,key, idx);
-    idx++;
-  }
 }
 
 function getRange(data) {
@@ -148,14 +131,15 @@ function getRange(data) {
   return result;
 }
 
-function _renderBarGraph(data, key, idx) {  
+function _renderBarGraph(data, idx) {  
 
-  var selected = _bars.selectAll('rect.bar-'+key).data(data.data.bars[key], function(d) { return d.time.toUTCString(); })
+  var key = data[idx].key
+    , selected = _bars.selectAll('rect.bar-'+key).data(data[idx].data, function(d) { return d.time.toUTCString(); })
     , floor = space.height - space.margin
     , fn = {
       x: function(d, i) {
         // time division + index division
-       return (i * _barWidth * ((_data.keyCount/2)+1)) + (_barWidth * idx)
+       return (i * _barWidth * ((_data.length/2)+1)) + (_barWidth * idx)
       },
       y: function(d, i) { return floor - _range(d.value); },
       h: function(d, i) { return _range(d.value); },
@@ -183,22 +167,29 @@ function _renderBarGraph(data, key, idx) {
     .attr('y', floor)
     .attr('height', 0)
     .remove();
+
+
 }
 
-function _renderLine(data, key, idx) {
+function _renderLine(data, idx) {
 
-  var selected = _lines.append('path').attr('id','line-'+key)
+  var key = data[idx].key
+    , selected = _lines.append('path').attr('id','line-'+key)
     , floor = space.height - space.margin
     , line = d3.svg.line().interpolate('basis')
       .x(function(d, i) { 
-        return (i * _barWidth * ((_data.keyCount/2)+1)) + (_barWidth * idx) + (_barWidth / 2);
+        return (i * _barWidth * ((_data.length/2)+1)) + (_barWidth * (idx-(_data.length/2))) + (_barWidth / 2);
       })
       .y(function(d, i) { return floor - _range(d.value); });
 
-      selected.attr('d', line(data.data.lines[key])).attr('stroke', COLORS[idx+2])
+      selected.attr('d', line(data[idx].data)).attr('stroke', COLORS[idx+2])
 }
 function _renderKey(data, key, idx) {
-  var selected = _values.append('g').attr('id','keyvalue-'+key)
+  // var selected = _values.append('g').attr('id','keyvalue-'+key).data();
+
+  // selected.selectAll('svg:circle').enter().append('svg:circle');
+  // selected.selectAll('svg:text.value').enter().append('svg:text').attr('class','value');
+  // selected.selectAll('svg:text.label').enter().append('svg:text').attr('class','label');
 }
 
 }());
