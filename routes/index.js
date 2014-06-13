@@ -9,3 +9,7 @@ exports.index = function(req, res){
 exports.lines = function(req, res) {
   res.render('lines', { title: 'd3sy: Linear interpolation' });
 };
+
+exports.pie = function(req, res) {
+	res.render('pie', { title: 'easounthaoesuntho' });
+};
