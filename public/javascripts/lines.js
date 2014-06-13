@@ -54,9 +54,10 @@
 
     function renderPath(data) {
 
-        var line = d3.svg.line();
+        var line = d3.svg.area().interpolate('cardinal');
             line.x(function(d, i) { return range.x(i) });
-            line.y(function(d, i) { return range.y(d.values[0].value) });
+            line.y0(height - margin * 2);
+            line.y1(function(d, i) { return range.y(d.values[0].value) });
 
         if (_needsTranslation == false) {
             _line.transition().attr('d', line(data));
